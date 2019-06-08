@@ -8,8 +8,19 @@ $empty_fields = false;
 $success = false;
 $invalid_symbols = false;
 $invalid_email = false;
+$taken = false;
+
+$dbusername = "root";
+$dbpassword = "";
+$dbhostname = "localhost";
+$dbname = "login";
+
+$conn1 = mysqli_connect($dbhostname,$dbusername,$dbpassword,$dbname);
 
 
+$username = isset($_GET['username']) ? $_GET['username'] : '';
+    $password = isset($_GET['password']) ? $_GET['password'] : '';
+    $email = isset($_GET['email']) ? $_GET['email'] : '';
 
 
 
@@ -20,25 +31,27 @@ $inserted = isset($_GET['inserted']) ? $_GET['inserted'] : false;
 switch($action){
 
      case 'add':
-    $username = isset($_GET['username']) ? $_GET['username'] : '';
-    $password = isset($_GET['password']) ? $_GET['password'] : '';
-    $email = isset($_GET['email']) ? $_GET['email'] : '';
+   
+   $sql1 = "SELECT * FROM deltest WHERE username ='$username';";
+  $result = mysqli_query($conn1, $sql1);
+  $resultCheck = mysqli_num_rows($result);
+  
+ 
+
 
     if(empty($username) || empty($password) || empty($email)){
         $empty_fields = true;
+
         
-
-
+  
     }elseif(!preg_match("/^[a-zA-Z]*$/", $username)){
         $invalid_symbols = true;
-       
-
-
-
-
+}elseif($resultCheck > 0){
+     $taken = true;
     }elseif(!filter_var($email, FILTER_VALIDATE_EMAIL)){
         $invalid_email = true;
         
+    
     }else{
         $sql = "INSERT INTO deltest(username, password, email) VALUES(:username, :password, :email)";
         $success = false;
@@ -127,6 +140,11 @@ $users = $stmt -> fetchAll();
       }elseif($invalid_symbols){                
           ?><div class="alert alert-danger">
                         <strong>Insert valid symbols!</strong> 
+                      </div> <?php
+
+      }elseif($taken){
+          ?><div class="alert alert-danger">
+                        <strong>Username is taken!</strong> 
                       </div> <?php
 
       }elseif($inserted){ ?>
